@@ -1,0 +1,22 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: hubspot-api-service - integracao HubSpot CRM (padrao cnpj-api-service)
+Parameters:
+  HubspotToken:
+    Type: String
+    NoEcho: true
+    Description: Private app token do HubSpot
+Resources:
+  HubspotApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: hubspot-api-lambda
+      CodeUri: .
+      Handler: handlers.lambda_handler.handler
+      Runtime: python3.13
+      Timeout: 300
+      MemorySize: 256
+      Role: arn:aws:iam::365502632637:role/hubspot-api-lambda-role
+      Environment:
+        Variables:
+          HUBSPOT_TOKEN: !Ref HubspotToken

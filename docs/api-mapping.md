@@ -3,7 +3,7 @@
 **Repo:** `neostrategy/hubspot-api-service`
 **Consumidor:** flow Prefect `pipeline-leads-hubspot`
 **Padrão:** invocação Lambda síncrona request/response (mesmo modelo do `cnpj-api-service`). O Lambda não persiste nada — devolve JSON e o pipeline decide o destino.
-**Última atualização:** 2026-07-08
+**Última atualização:** 2026-07-28
 
 ---
 
@@ -37,7 +37,7 @@ Formato de resposta em todas as actions:
 | Campo | Tipo | Obrigatório | Default | Descrição |
 |---|---|---|---|---|
 | `action` | string | não | `"extract"` | |
-| `object_type` | string | sim | — | `contacts` \| `deals` \| `companies` \| `tasks` \| `calls` |
+| `object_type` | string | sim | — | `contacts` \| `deals` \| `companies` \| `tasks` \| `calls` \| `meetings` |
 | `after` | string | não | `null` | Cursor devolvido na invocação anterior. Omitir na 1ª chamada |
 | `max_pages` | int | não | `10` | Páginas por invocação (100 registros/página) |
 | `properties` | list[string] | não | `constants/properties.py` | Sobrescreve a lista padrão |
@@ -218,3 +218,44 @@ Fonte da verdade: `constants/properties.py` (`OBJECT_CONFIG`).
 - [ ] Associações no cadastro: `create` de deals ainda não envia o bloco `associations` (deal→contact/company). Decidir se o vínculo é feito no cadastro ou em passo separado via API v4
 - [ ] Estratégia de deduplicação de deals no pipeline (não há chave natural na API → extrair, casar e decidir create vs update no flow)
 - [ ] Extração incremental (`hs_lastmodifieddate`) via endpoint `/search` — hoje a extração é sempre full
+---
+
+## Adendo 2026-07-28 — action `search` (extração incremental) e objeto `meetings`
+
+### `search` — extração incremental por última modificação
+
+**Endpoint HubSpot usado:** `POST /crm/v3/objects/{object_type}/search`
+
+Mesmo contrato de resposta do `extract` (`ExtractionPage`). Filtra por
+`hs_lastmodifieddate >= since` (`lastmodifieddate` no caso de contacts),
+ordenado ascendente — o pipeline avança o watermark a partir do último
+registro do bloco.
+
+**Request:**
+
+| Campo | Tipo | Obrigatório | Default | Descrição |
+|---|---|---|---|---|
+| `action` | string | sim | — | `"search"` |
+| `object_type` | string | sim | — | qualquer objeto do `OBJECT_CONFIG` |
+| `since` | string \| int | sim | — | Watermark: ISO 8601 ou epoch em ms |
+| `after` | string | não | `null` | Cursor da invocação anterior |
+| `max_pages` | int | não | `10` | Páginas por invocação (100 registros/página) |
+| `properties` | list[string] | não | `constants/properties.py` | Sobrescreve a lista padrão |
+
+**Limitações (Search API):**
+- Máx. **10.000 resultados por consulta** — o pipeline deve fatiar a janela
+  de `since` quando o warning de cap aparecer no log. Carga histórica
+  inicial: usar `extract` (full), não `search`.
+- **Não devolve `associations`** — buscar via API v4 para os IDs alterados.
+
+### Objeto `meetings`
+
+Adicionado ao `OBJECT_CONFIG` com `MEETING_PROPERTIES`
+(título, outcome, início/fim, owner, timestamps) e associações padrão
+`contacts` e `deals`. Disponível nas actions `extract` e `search`.
+
+### Propriedades novas em `contacts`
+
+`firstname`, `lastname`, `lifecyclestage`, `hs_lead_status`,
+`hs_latest_source`, `hs_latest_source_timestamp` — necessárias para as
+tabelas analíticas (identificação e atribuição first/last touch).
