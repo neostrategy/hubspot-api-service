@@ -40,7 +40,7 @@ class LoaderService:
         if action not in ("create", "upsert", "update"):
             raise ValueError(f"action de carga inválida: {action!r}")
         if action == "upsert" and not id_property:
-            raise ValueError("upsert exige id_property (ex.: 'e,ail' para contacts)")
+            raise ValueError("upsert exige id_property (ex.: 'email' para contacts)")
         if not records:
             raise ValueError("records vazio")
 
@@ -57,7 +57,7 @@ class LoaderService:
         )
 
         for start in range(0, len(records), BATCH_SIZE):
-            chunk =records[start:start + BATCH_SIZE]
+            chunk = records[start:start + BATCH_SIZE]
             inputs = self._build_inputs(action, chunk, id_property)
 
             try:

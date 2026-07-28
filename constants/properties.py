@@ -8,6 +8,12 @@ ASSOCIATIONS = ["contacts", "deals", "companies", "tasks", "calls"]
 
 CONTACT_PROPERTIES = [
     "email",
+    "firstname",
+    "lastname",
+    "lifecyclestage",
+    "hs_lead_status",
+    "hs_latest_source",
+    "hs_latest_source_timestamp",
     "phone",
     "mobilephone",
     "cadastrado_canal_azul",
@@ -116,6 +122,27 @@ CALL_PROPERTIES = [
     "hs_timestamp",             # data/hora da chamada
 ]
 
+MEETING_PROPERTIES = [
+    "hs_meeting_title",
+    "hs_meeting_outcome",          # SCHEDULED, COMPLETED, NO_SHOW, CANCELED...
+    "hs_meeting_location",
+    "hs_meeting_start_time",
+    "hs_meeting_end_time",
+    "hs_meeting_body",
+    "hubspot_owner_id",
+    "hs_createdate",
+    "hs_lastmodifieddate",
+    "hs_timestamp",                # data/hora de referência da reunião
+]
+
+# Propriedade de última modificação usada pela action `search`.
+# Contacts é a exceção histórica da API: usa `lastmodifieddate`;
+# todos os demais objetos usam `hs_lastmodifieddate`.
+LASTMODIFIED_PROPERTY: dict[str, str] = {
+    "contacts": "lastmodifieddate",
+}
+DEFAULT_LASTMODIFIED = "hs_lastmodifieddate"
+
 # Mapa objeto -> (propriedades, associações padrão) usado pelo handler
 OBJECT_CONFIG: dict[str, dict] = {
     "contacts": {
@@ -136,6 +163,10 @@ OBJECT_CONFIG: dict[str, dict] = {
     },
     "calls": {
         "properties": CALL_PROPERTIES,
+        "associations": ["contacts", "deals"],
+    },
+    "meetings": {
+        "properties": MEETING_PROPERTIES,
         "associations": ["contacts", "deals"],
     },
 }

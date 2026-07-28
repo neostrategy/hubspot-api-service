@@ -14,4 +14,4 @@ def flatten_associations(associations: dict[str, Any]) -> dict[str, list[str]]:
         ids = [str(r["id"]) for r in results if r.get("id") is not None]
         if ids:
             flat[assoc_type] = ids
-        return flat
+    return flat
