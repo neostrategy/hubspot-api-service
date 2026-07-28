@@ -1,0 +1,9 @@
+2026-07-28 11:38:54 ERROR    services.loader [contacts] Lote 0-100 falhou: Retries esgotadas para POST /crm/v3/objects/contacts/batch/update
+2026-07-28 11:38:59 ERROR    services.loader [contacts] Lote 100-200 falhou: Retries esgotadas para POST /crm/v3/objects/contacts/batch/update
+2026-07-28 11:39:04 ERROR    services.loader [contacts] Lote 200-300 falhou: Retries esgotadas para POST /crm/v3/objects/contacts/batch/update
+2026-07-28 11:39:08 ERROR    services.loader [contacts] Lote 300-400 falhou: Retries esgotadas para POST /crm/v3/objects/contacts/batch/update
+2026-07-28 11:39:13 ERROR    services.loader [contacts] Lote 400-500 falhou: Retries esgotadas para POST /crm/v3/objects/contacts/batch/update
+2026-07-28 11:39:17 ERROR    services.loader [contacts] Lote 500-600 falhou: Retries esgotadas para POST /crm/v3/objects/contacts/batch/update
+2026-07-28 11:39:23 ERROR    services.loader [contacts] Lote 600-700 falhou: Retries esgotadas para POST /crm/v3/objects/contacts/batch/update
+2026-07-28 11:39:28 ERROR    services.loader [contacts] Lote 700-800 falhou: Retries esgotadas para POST /crm/v3/objects/contacts/batch/update
+2026-07-28 11:39:33 ERROR    services.loader [contacts] Lote 800-900 falhou: Retries esgotadas para POST /crm/v3/objects/contacts/batch/update

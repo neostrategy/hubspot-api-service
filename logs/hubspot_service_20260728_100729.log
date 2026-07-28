@@ -1,0 +1,3 @@
+2026-07-28 10:07:32 ERROR    services.loader [contacts] Lote 0-2 falhou: Retries esgotadas para POST /crm/v3/objects/contacts/batch/upsert
+2026-07-28 10:07:32 INFO     services.loader [contacts] upsert concluído: 2 enviados, 0 ok, 2 falhas
+2026-07-28 10:07:32 INFO     hubspot_service Carga concluída: {'object_type': 'contacts', 'action': 'upsert', 'total_sent': 2, 'total_succeeded': 0, 'total_failed': 2, 'errors': [{'range': [0, 2], 'error': 'Retries esgotadas para POST /crm/v3/objects/contacts/batch/upsert'}], 'results': []}
