@@ -29,6 +29,15 @@ Extração incremental (mesmo contrato de resposta do extract):
     Observações: máx. 10.000 resultados por janela de since (fatiar no
     pipeline); Search API não devolve associations.
 
+Associações em lote (a Search API não devolve associations):
+    {
+        "action": "associations",
+        "from_object": "meetings",
+        "to_object": "contacts",     # contacts | deals | companies
+        "ids": ["900", "901", ...]   # máx. sugerido 1000 por invocação
+    }
+    -> body: {from_object, to_object, pairs: [{from_id, to_id, type}], ...}
+
 Carga (contacts e deals):
     {
         "action": "create" | "update" | "upsert",
@@ -46,6 +55,7 @@ import json
 import logging 
 import os
 from core.hubspot_client import HubspotClient
+from services.associations import AssociationsServices
 from services.extractor import ExtractorService
 from services.loader import LoaderService
 
@@ -58,7 +68,8 @@ def handler(event: dict, context) -> dict:
     action = event.get("action", "extract")
     object_type = event.get("object_type")
 
-    if not object_type:
+    # `associations` identifica os objetos por from_object/to_object
+    if not object_type and action != "associations":
         return _response(400, {"error": "object_type é obrigatório"})
     client = HubspotClient(token=os.environ["HUBSPOT_TOKEN"])
 
@@ -72,6 +83,22 @@ def handler(event: dict, context) -> dict:
                 associations=event.get("associations"),
             )
             return _response(200, page.to_dict())
+        if action == "associations":
+            from_object = event.get("from_object")
+            to_object = event.get("to_object")
+            ids = event.get("ids") or []
+            if not from_object or not to_object:
+                return _response(400, {"error": "associations exige from_object e to_object"})
+            if not isinstance(ids, list) or not ids:
+                return _response(400, {"error": "associations exige ids (lista não vazia)"})
+            pares = AssociationsServices(client).read_batch(from_object, to_object, ids)
+            return _response(200, {
+                "from_object": from_object,
+                "to_object": to_object,
+                "pairs": pares,
+                "pair_count": len(pares),
+                "id_count": len(ids),
+            })
         if action == "search":
             since = event.get("since")
             if not since:
