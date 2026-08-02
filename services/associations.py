@@ -25,3 +25,56 @@ class AssociationsServices:
                 from_object, from_id, to_object, exc,
             )
             return []
+
+    BATCH_SIZE = 100  # limite do endpoint batch/read da API v4
+
+    def read_batch(
+            self,
+            from_object: str,
+            to_object: str,
+            ids: list[str],
+    ) -> list[dict]:
+        """Resolve associações de vários registros de uma vez (API v4 batch).
+
+        POST /crm/v4/associations/{from}/{to}/batch/read, em blocos de 100.
+        Devolve uma linha achatada por par associado:
+            {"from_id": "...", "to_id": "...", "type": "..."}
+
+        Usado pelo pipeline analítico: a Search API (incremental) não
+        devolve associações, então o flow chama esta action com os IDs
+        que vieram alterados na janela.
+        """
+        if not ids:
+            return []
+
+        pares: list[dict] = []
+        for start in range(0, len(ids), self.BATCH_SIZE):
+            chunk = ids[start:start + self.BATCH_SIZE]
+            body = {"inputs": [{"id": str(i)} for i in chunk]}
+            try:
+                _, data = self.client.post_batch(
+                    f"/crm/v4/associations/{from_object}/{to_object}/batch/read",
+                    body,
+                )
+            except Exception as exc:
+                log.warning(
+                    "Erro no batch de associações %s -> %s (%d ids): %s",
+                    from_object, to_object, len(chunk), exc,
+                )
+                continue
+
+            for resultado in data.get("results", []):
+                from_id = str(resultado.get("from", {}).get("id", ""))
+                for alvo in resultado.get("to", []):
+                    tipos = alvo.get("associationTypes", [])
+                    pares.append({
+                        "from_id": from_id,
+                        "to_id": str(alvo.get("toObjectId", "")),
+                        "type": tipos[0].get("label") if tipos else None,
+                    })
+
+        log.info(
+            "[assoc] %s -> %s: %d pares para %d ids",
+            from_object, to_object, len(pares), len(ids),
+        )
+        return pares

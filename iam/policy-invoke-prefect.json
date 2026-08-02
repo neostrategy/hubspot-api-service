@@ -4,7 +4,7 @@
     {
       "Effect": "Allow",
       "Action": "lambda:InvokeFunction",
-      "Resource": "arn:aws:lambda:REGIAO:365502632637:function:hubspot-api-lambda"
+      "Resource": "arn:aws:lambda:sa-east-1:365502632637:function:hubspot-api-lambda"
     }
   ]
 }
