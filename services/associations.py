@@ -67,10 +67,13 @@ class AssociationsServices:
                 from_id = str(resultado.get("from", {}).get("id", ""))
                 for alvo in resultado.get("to", []):
                     tipos = alvo.get("associationTypes", [])
+                    primeiro = tipos[0] if tipos else {}
                     pares.append({
                         "from_id": from_id,
                         "to_id": str(alvo.get("toObjectId", "")),
-                        "type": tipos[0].get("label") if tipos else None,
+                        "type": primeiro.get("label"),
+                        "type_id": primeiro.get("typeId"),
+                        "category": primeiro.get("category"),
                     })
 
         log.info(
