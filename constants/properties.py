@@ -52,6 +52,8 @@ CONTACT_PROPERTIES = [
     "createdate",
     "lastmodifieddate",
     "hubspot_owner_id",
+    "campanha",
+    "tipo_de_campanha"
 ]
 
 DEAL_PROPERTIES = [
