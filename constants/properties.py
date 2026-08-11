@@ -72,6 +72,10 @@ DEAL_PROPERTIES = [
     "description",
     "hs_forecast_category",
     "hs_next_step",
+    "categoria_de_produto_de_interesse",
+    "qualificado_para_qual_funil",
+    "direcionado",
+    "no_bo"
 ]
 
 COMPANY_PROPERTIES = [
