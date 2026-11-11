@@ -7,8 +7,35 @@ Parameters:
     NoEcho: true
     Description: Private app token do HubSpot
 Resources:
+  # O role de execução agora nasce com a stack, em qualquer conta.
+  # Antes era criado à mão e o ARN, com o ID da conta, ficava fixo aqui.
+  HubspotApiFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: hubspot-api-lambda-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Tags:
+        - Key: servico
+          Value: hubspot-api-service
+
+  # Sem isto, o log group é criado pela própria Lambda e guarda logs para sempre.
+  HubspotApiFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: /aws/lambda/hubspot-api-lambda
+      RetentionInDays: 30
+
   HubspotApiFunction:
     Type: AWS::Serverless::Function
+    DependsOn: HubspotApiFunctionLogGroup
     Properties:
       FunctionName: hubspot-api-lambda
       CodeUri: .
@@ -16,7 +43,7 @@ Resources:
       Runtime: python3.13
       Timeout: 300
       MemorySize: 256
-      Role: arn:aws:iam::365502632637:role/hubspot-api-lambda-role
+      Role: !GetAtt HubspotApiFunctionRole.Arn
       Environment:
         Variables:
           HUBSPOT_TOKEN: !Ref HubspotToken

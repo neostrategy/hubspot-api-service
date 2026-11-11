@@ -25,9 +25,8 @@ jobs:
 
       - uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::365502632637:role/hubspot-api-deploy-role
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
           aws-region: sa-east-1
-          
 
       - name: SAM build
         run: sam build
@@ -38,6 +37,7 @@ jobs:
           --stack-name hubspot-api-service
           --no-confirm-changeset
           --no-fail-on-empty-changeset
-          --capabilities CAPABILITY_IAM
-          --resolve-s3
+          --capabilities CAPABILITY_NAMED_IAM
+          --s3-bucket neotass-artifacts-sa-east-1
+          --s3-prefix hubspot-api-service
           --parameter-overrides HubspotToken=${{ secrets.HUBSPOT_TOKEN }}
